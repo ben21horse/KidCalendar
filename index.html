@@ -67,11 +67,23 @@ h1{margin:0;font-size:clamp(1.4rem,3.6vw,2.2rem);font-weight:800;letter-spacing:
 .more{font-size:.75rem;color:var(--mute);padding:2px 4px}
 .chores{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
 .cbox{border-radius:14px;padding:10px 12px 12px;color:#2d1b4e}
-.cbox h2{margin:0 0 8px;font-size:1.05rem;font-weight:800}
+.chead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.cbox h2{margin:0;font-size:1.05rem;font-weight:800}
+.undo{border:1px solid #8c74c4;background:rgba(255,255,255,.6);color:#3b2766;border-radius:999px;font-size:.75rem;padding:2px 11px;flex:none}
+.undo:hover:not(:disabled){background:#fff}
+.undo:disabled{opacity:.4;cursor:default}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
-.tile{background:rgba(255,255,255,.72);border-radius:10px;padding:8px 10px}
-.tile b{display:block;font-weight:600}
-.tile small{display:block;font-size:.74rem;line-height:1.3;color:#5a4780}
+.tile{perspective:700px;background:none;border:0;padding:0;height:88px;text-align:left;border-radius:10px}
+.tile.done{cursor:default}
+.inner{position:relative;display:block;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,.1,.2,1);transform-style:preserve-3d}
+.tile.done .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:10px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.front{background:rgba(255,255,255,.72);padding:8px 10px}
+.front b{display:block;font-weight:600}
+.front small{display:block;font-size:.74rem;line-height:1.3;color:#5a4780}
+.back{transform:rotateY(180deg)}
+.back svg{display:block}
+@media (prefers-reduced-motion:reduce){.inner{transition:none}}
 @media (max-width:900px){.chores{grid-template-columns:1fr}}
 @media (max-width:640px){.cell{min-height:70px}.pill{font-size:.68rem}.mhead div{padding:4px 2px}.tgscroll{--gw:44px}}
 </style>
@@ -286,12 +298,73 @@ async function loadFeeds(){
   document.getElementById('note').textContent=failed.length?`Couldn’t load: ${failed.join(', ')}. Check the Worker address and feed names.`:`Loaded ${FEEDS.length} calendar${FEEDS.length>1?'s':''}.`;
   render();
 }
-/* Chore boxes: one pastel purple per girl, three tiles each */
+/* Chores: click a tile to complete it (ding + flip to a wildflower meadow); Undo reverses the latest one */
 const CHORES={Beth:'#e4d9f6',Lucy:'#dcd0f4',Rose:'#e9defa'};
-document.getElementById('chores').innerHTML=Object.entries(CHORES).map(([name,bg])=>
-  `<section class="cbox" style="background:${bg}"><h2>${name}’s Upcoming Chores</h2><div class="tiles">${
-    [1,2,3].map(i=>`<div class="tile"><b>Chore ${i}</b><small>Due Sat, Nov 21</small><small>4 days away</small></div>`).join('')
-  }</div></section>`).join('');
+const FC={pink:'#f28cb8',purple:'#9b6fd6',yellow:'#ffd23f',white:'#fffaf0',orange:'#ff9a4d',blue:'#6f9df0'};
+const defs=`<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ec5f5"/><stop offset=".65" stop-color="#d9efff"/><stop offset="1" stop-color="#fff1d6"/></linearGradient>${
+  Object.entries(FC).map(([k,c])=>`<symbol id="f-${k}" viewBox="-10 -10 20 20"><g fill="${c}">${[0,1,2,3,4,5].map(a=>`<ellipse cx="0" cy="-5.2" rx="2.9" ry="5" transform="rotate(${a*60})"/>`).join('')}</g><circle r="2.6" fill="${k==='yellow'?'#d97a00':'#ffcf33'}"/></symbol>`).join('')
+}</defs></svg>`;
+
+function meadow(seed){
+  let a=seed>>>0;
+  const r=()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296};
+  const keys=Object.keys(FC);
+  let s='<svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" aria-hidden="true">'
+   +'<rect width="200" height="150" fill="url(#sky)"/><circle cx="162" cy="26" r="12" fill="#fff6c9" opacity=".9"/>'
+   +'<path d="M0 78 Q40 55 90 72 T200 62 V150 H0Z" fill="#a8d693"/><path d="M0 92 Q60 70 120 88 T200 82 V150 H0Z" fill="#7bbd6b"/><rect y="104" width="200" height="46" fill="#5fa653"/>';
+  const fl=[];for(let i=0;i<30;i++)fl.push({x:6+r()*188,y:92+r()*52,k:keys[Math.floor(r()*keys.length)],b:(r()-.5)*8});
+  fl.sort((p,q)=>p.y-q.y);
+  for(const f of fl){
+    const t=(f.y-92)/52,sz=11+t*14;
+    s+=`<path d="M${f.x.toFixed(1)} ${f.y.toFixed(1)} q${f.b.toFixed(1)} 12 ${(f.b/2).toFixed(1)} ${(152-f.y).toFixed(1)}" stroke="#3f8a3a" stroke-width="1.3" fill="none"/>`
+      +`<use href="#f-${f.k}" x="${(f.x-sz/2).toFixed(1)}" y="${(f.y-sz/2).toFixed(1)}" width="${sz.toFixed(1)}" height="${sz.toFixed(1)}"/>`;
+  }
+  return s+'</svg>';
+}
+const seedOf=(name,i)=>[...name].reduce((s,c)=>s*31+c.charCodeAt(0),7)+i*9973;
+
+/* A soft bell: a few sine partials that fade at different speeds */
+let ac;
+function ding(){
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==='suspended')ac.resume();
+    const t=ac.currentTime;
+    [[988,.32,1.8],[1976,.14,1.1],[2726,.08,.7],[3951,.04,.4]].forEach(([f,v,d])=>{
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(.0001,t);
+      g.gain.exponentialRampToValueAtTime(v,t+.006);
+      g.gain.exponentialRampToValueAtTime(.0001,t+d);
+      o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d+.05);
+    });
+  }catch(e){}
+}
+
+/* Completed chores per person, in the order they were checked off (kept in this browser) */
+let done={Beth:[],Lucy:[],Rose:[]};
+try{const s=JSON.parse(localStorage.getItem('kidcal-done')||'null');if(s)done={...done,...s}}catch(e){}
+const saveDone=()=>{try{localStorage.setItem('kidcal-done',JSON.stringify(done))}catch(e){}};
+
+const tileHTML=(name,i)=>{const d=done[name].includes(i);
+  return `<button class="tile${d?' done':''}" data-n="${name}" data-i="${i}" aria-pressed="${d}" aria-label="Chore ${i}, due Sat, Nov 21${d?', completed':''}"><span class="inner"><span class="face front"><b>Chore ${i}</b><small>Due Sat, Nov 21</small><small>4 days away</small></span><span class="face back">${meadow(seedOf(name,i))}</span></span></button>`};
+document.getElementById('chores').innerHTML=defs+Object.entries(CHORES).map(([name,bg])=>
+  `<section class="cbox" style="background:${bg}"><div class="chead"><h2>${name}’s Upcoming Chores</h2><button class="undo" data-undo="${name}" aria-label="Undo last completed chore for ${name}"${done[name].length?'':' disabled'}>Undo</button></div><div class="tiles">${[1,2,3].map(i=>tileHTML(name,i)).join('')}</div></section>`).join('');
+
+function syncChores(){
+  document.querySelectorAll('.tile').forEach(t=>{
+    const d=done[t.dataset.n].includes(+t.dataset.i);
+    t.classList.toggle('done',d);t.setAttribute('aria-pressed',d);
+    t.setAttribute('aria-label',`Chore ${t.dataset.i}, due Sat, Nov 21${d?', completed':''}`);
+  });
+  document.querySelectorAll('.undo').forEach(b=>b.disabled=!done[b.dataset.undo].length);
+}
+document.getElementById('chores').onclick=e=>{
+  const u=e.target.closest('.undo');
+  if(u){done[u.dataset.undo].pop();saveDone();syncChores();return}
+  const t=e.target.closest('.tile');
+  if(t&&!t.classList.contains('done')){done[t.dataset.n].push(+t.dataset.i);saveDone();syncChores();ding()}
+};
 render();loadFeeds();
 </script>
 </body>
