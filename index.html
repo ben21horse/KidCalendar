@@ -229,8 +229,9 @@ function expand(e){
 
 /* Live feeds: set WORKER to your Cloudflare Worker URL and list your feeds.
    id must match a key in the Worker; cal is maya, leo or family. */
-const WORKER='https://YOUR-WORKER.workers.dev';
+const WORKER='https://kidcalendar-feeds.yourname.workers.dev';
 const FEEDS=[{id:'first',cal:'family'}];
+
 async function loadFeeds(){
   if(WORKER.includes('YOUR-WORKER'))return;
   const all=[],failed=[];
