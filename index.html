@@ -15,7 +15,11 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.4 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.app{max-width:none;margin:0;padding:8px 10px}
+.app{max-width:none;margin:0;padding:8px 10px;display:flex;flex-direction:column;height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+header,.bar{flex:none}
+#view{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column}
+#view>.tgscroll{flex:1;min-height:0}
+#view>.mhead,#view>.mgrid{flex:none}
 header{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between;margin-bottom:10px}
 .nav,.ctl,.seg{display:flex;gap:8px;align-items:center}
 h1{margin:0;font-size:clamp(1.4rem,3.6vw,2.2rem);font-weight:800;letter-spacing:-.02em;min-width:7ch;text-align:center}
@@ -29,7 +33,7 @@ h1{margin:0;font-size:clamp(1.4rem,3.6vw,2.2rem);font-weight:800;letter-spacing:
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 .spacer{flex:1}
 #note{color:var(--mute);font-size:.85rem}
-.tgscroll{--hh:56px;--gw:52px;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:auto;height:calc(100dvh - 390px);min-height:380px}
+.tgscroll{--hh:56px;--gw:52px;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:auto;height:auto;min-height:0}
 .tginner.wk{min-width:760px}
 .tgtop{position:sticky;top:0;z-index:6;background:var(--surface);display:grid;grid-template-columns:var(--gw) repeat(var(--n),minmax(0,1fr));border-bottom:1px solid var(--hr)}
 .dh2{display:flex;gap:8px;align-items:baseline;justify-content:center;padding:8px 4px;border-left:1px solid var(--line)}
@@ -65,18 +69,18 @@ h1{margin:0;font-size:clamp(1.4rem,3.6vw,2.2rem);font-weight:800;letter-spacing:
 .cell .d{font-weight:600;font-size:.9rem;padding:0 3px}
 .pill{background:var(--evbg,var(--ev));color:var(--evfg,#fff);border-left:3px solid var(--evbd,var(--ev));border-radius:4px;font-size:.75rem;line-height:1.25;padding:1px 5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .more{font-size:.75rem;color:var(--mute);padding:2px 4px}
-.chores{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+.chores{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px;flex:none}
 .cbox{background:var(--bx);color:var(--bxi);border-radius:14px;padding:10px 12px 12px}
-.p-beth{--bx:#c3ebbd;--bxi:#14391a;--bxl:#4a9f46;--bxs:#3d6b41}
-.p-lucy{--bx:#bde3fa;--bxi:#0f3550;--bxl:#3b8fc4;--bxs:#2f5f80}
-.p-rose{--bx:#cbbaf0;--bxi:#2a1458;--bxl:#7a58c0;--bxs:#58409a}
+.p-beth{--bx:#c3ebbd;--bxi:#14391a;--bxl:#4a9f46;--bxs:#3d6b41;--bxd:#1f6b2c}
+.p-lucy{--bx:#bde3fa;--bxi:#0f3550;--bxl:#3b8fc4;--bxs:#2f5f80;--bxd:#1b5d8f}
+.p-rose{--bx:#cbbaf0;--bxi:#2a1458;--bxl:#7a58c0;--bxs:#58409a;--bxd:#4b2c9a}
 .chead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .cbox h2{margin:0;font-size:1.05rem;font-weight:800}
 .undo{border:1px solid var(--bxl);background:rgba(255,255,255,.6);color:var(--bxi);border-radius:999px;font-size:.75rem;padding:2px 11px;flex:none}
 .undo:hover:not(:disabled){background:#fff}
 .undo:disabled{opacity:.4;cursor:default}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
-.tile{perspective:700px;background:none;border:0;padding:0;height:96px;text-align:left;border-radius:10px}
+.tile{perspective:700px;background:none;border:0;padding:0;height:100px;text-align:left;border-radius:10px}
 .tile.done{cursor:default}
 .inner{position:relative;display:block;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,.1,.2,1);transform-style:preserve-3d}
 .tile.done .inner{transform:rotateY(180deg)}
@@ -84,13 +88,18 @@ h1{margin:0;font-size:clamp(1.4rem,3.6vw,2.2rem);font-weight:800;letter-spacing:
 .front{background:rgba(255,255,255,.78);padding:8px 10px}
 .front b{display:block;font-weight:600;font-size:.88rem;line-height:1.25}
 .front small{display:block;font-size:.74rem;line-height:1.3;color:var(--bxs)}
+.tile.t-due .front,.tile.t-over .front{box-shadow:inset 0 0 0 3px var(--bxd)}
+.tile.t-due .front b,.tile.t-over .front b{font-size:1rem}
+.tile.t-due .front small,.tile.t-over .front small{font-size:.82rem}
+.tile.t-over .front{background:#f9c8c8}
+.tile.t-over .front small{color:#7a2424}
 .back{transform:rotateY(180deg)}
 .back svg{display:block}
 .k-lucy{--evbg:#b8e0f7;--evfg:#0c2e47;--evbd:#3b8fc4}
 .k-rose{--evbg:#cbbaf0;--evfg:#2a1458;--evbd:#7a58c0}
 .k-beth{--evbg:#c3ebbd;--evfg:#14391a;--evbd:#4a9f46}
 @media (prefers-reduced-motion:reduce){.inner{transition:none}}
-@media (max-width:900px){.chores{grid-template-columns:1fr}}
+@media (max-width:900px){.chores{grid-template-columns:1fr}.app{height:auto}#view{display:block;overflow:visible}#view>.tgscroll{height:70dvh;flex:none}}
 @media (max-width:640px){.cell{min-height:70px}.pill{font-size:.68rem}.mhead div{padding:4px 2px}.tgscroll{--gw:44px}}
 </style>
 </head>
@@ -137,11 +146,13 @@ const sample=[
  ev(0,15,45,60,'Lucy: soccer practice','Boyer Park'),
  ev(0,16,0,45,'Rose: piano lesson','Keys Studio'),
  ev(0,16,15,60,'Beth: swim team','Community Pool'),
- ev(1,16,0,90,'Rose: robotics club','Room 112'),
+ ev(1,16,0,90,'Robotics club','Room 112'),
  ev(1,18,30,60,'Family dinner at Grandma’s'),
  ad(2,'Berkshire picture day'),
  ev(2,9,0,60,'Beth: orthodontist'),
  ev(2,15,30,60,'Lucy: art class'),
+ ev(2,16,0,60,'Honors choir rehearsal','Music Hall'),
+ ev(3,13,0,90,'Honors orchestra','Music Hall'),
  ev(3,10,0,120,'Birthday party','Jump Zone'),
  ev(4,11,0,90,'Rose: soccer game','Boyer Park'),
  ad(5,'No school'),
@@ -150,9 +161,17 @@ const sample=[
  ev(9,17,0,60,'Lucy: piano recital','Keys Studio'),
  ev(-2,16,0,60,'Lucy: soccer practice','Boyer Park')
 ];
-/* Events that mention a girl (or Berkshire, for Lucy) take her color; everything else stays red */
-const kindOf=e=>{const t=`${e.title} ${e.loc||''} ${e.desc||''}`;return /\blucy\b|berkshire/i.test(t)?'k-lucy':/\brose\b/i.test(t)?'k-rose':/\bbeth\b/i.test(t)?'k-beth':''};
-let events=[...sample];
+/* Events take the color of each girl they mention (Robotics and Honors Orchestra are Lucy; Honors Choir is Beth and Rose); everything else stays red */
+const kindsOf=e=>{
+  const t=`${e.title} ${e.loc||''} ${e.desc||''}`,k=[];
+  if(/\blucy\b|robotics|honors\s+orchestra/i.test(t))k.push('k-lucy');
+  if(/\brose\b|honors\s+choir/i.test(t))k.push('k-rose');
+  if(/\bbeth\b|honors\s+choir/i.test(t))k.push('k-beth');
+  if(!k.length&&/berkshire/i.test(t))k.push('k-lucy');   /* Berkshire only counts when nothing else matched */
+  return k.length?k:[''];
+};
+const tagged=list=>list.flatMap(e=>kindsOf(e).map(k=>({...e,k})));  /* an event for two girls is shown twice, once in each color */
+let events=tagged(sample);
 let view='3day',anchor=TODAY;
 let gridScroll=Math.max(6,new Date().getHours()-1)*HH;
 
@@ -172,13 +191,13 @@ function timedLayout(day){
   flush();return out;
 }
 const blk=o=>{const e=o.e;
-  return `<div class="ev ${kindOf(e)}" title="${esc(e.title)}${e.loc?' – '+esc(e.loc):''}" style="top:${o.s*HH/60}px;height:${(o.t-o.s)*HH/60-1}px;left:calc(${o.c/o.n*100}% + 2px);width:calc(${100/o.n}% - 4px)"><b>${esc(e.title)}</b><span>${fmt(e.start)} – ${fmt(e.end)}</span>${e.loc?`<span>${esc(e.loc)}</span>`:''}</div>`};
+  return `<div class="ev ${e.k}" title="${esc(e.title)}${e.loc?' – '+esc(e.loc):''}" style="top:${o.s*HH/60}px;height:${(o.t-o.s)*HH/60-1}px;left:calc(${o.c/o.n*100}% + 2px);width:calc(${100/o.n}% - 4px)"><b>${esc(e.title)}</b><span>${fmt(e.start)} – ${fmt(e.end)}</span>${e.loc?`<span>${esc(e.loc)}</span>`:''}</div>`};
 
 function grid(days,wk){
   const n=days.length,now=new Date(),nowMin=(now-sod(now))/6e4;
   const hasAD=days.some(d=>eventsOn(d).some(e=>e.allDay));
   let top='<div class="tgtop"><div></div>'+days.map(d=>`<div class="dh2${same(d,TODAY)?' is-today':''}"><span class="wd">${d.toLocaleDateString([],{weekday:'short'})}</span><span class="dn">${d.getDate()}</span></div>`).join('');
-  if(hasAD)top+='<div class="adl">all-day</div>'+days.map(d=>`<div class="adc">${eventsOn(d).filter(e=>e.allDay).map(e=>`<div class="chip ${kindOf(e)}">${esc(e.title)}</div>`).join('')}</div>`).join('');
+  if(hasAD)top+='<div class="adl">all-day</div>'+days.map(d=>`<div class="adc">${eventsOn(d).filter(e=>e.allDay).map(e=>`<div class="chip ${e.k}">${esc(e.title)}</div>`).join('')}</div>`).join('');
   top+='</div>';
   let hours='',lines='';
   for(let h=0;h<24;h++){
@@ -212,7 +231,7 @@ function render(){
     let h='<div class="mhead">'+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div>${x}</div>`).join('')+'</div><div class="mgrid">';
     for(let i=0;i<weeks*7;i++){
       const d=add(gs,i),list=eventsOn(d).sort((x,y)=>(y.allDay-x.allDay)||(x.start-y.start));
-      h+=`<button class="cell${same(d,TODAY)?' is-today':''}${d.getMonth()!==first.getMonth()?' dim':''}" data-day="${d.getTime()}" aria-label="${d.toDateString()}, ${list.length} events"><div class="d">${d.getDate()}</div>${list.slice(0,3).map(e=>`<div class="pill ${kindOf(e)}">${e.allDay?'':fmt(e.start).replace(/ ?[AP]M/,'')+' '}${esc(e.title)}</div>`).join('')}${list.length>3?`<div class="more">+${list.length-3} more</div>`:''}</button>`;
+      h+=`<button class="cell${same(d,TODAY)?' is-today':''}${d.getMonth()!==first.getMonth()?' dim':''}" data-day="${d.getTime()}" aria-label="${d.toDateString()}, ${list.length} events"><div class="d">${d.getDate()}</div>${list.slice(0,3).map(e=>`<div class="pill ${e.k}">${e.allDay?'':fmt(e.start).replace(/ ?[AP]M/,'')+' '}${esc(e.title)}</div>`).join('')}${list.length>3?`<div class="more">+${list.length-3} more</div>`:''}</button>`;
     }
     el.innerHTML=h+'</div>';
   }
@@ -285,7 +304,7 @@ document.getElementById('imp').onclick=()=>document.getElementById('file').click
 document.getElementById('file').onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   const got=parseICS(await f.text());
-  events=got.flatMap(x=>expand(x));
+  events=tagged(got.flatMap(x=>expand(x)));
   document.getElementById('note').textContent=got.length?`Loaded ${got.length} events from ${f.name}.`:'No events found in that file. Export a calendar from Google Calendar as .ics and try again.';
   render();
 };
@@ -298,12 +317,12 @@ async function loadFeeds(){
   const all=[],failed=[];
   for(const f of FEEDS){
     try{
-      const r=await fetch(`${WORKER}/?id=${encodeURIComponent(f.id)}`);
+      const r=await fetch(`${WORKER.replace(/\/$/,'')}/?id=${encodeURIComponent(f.id)}`);
       if(!r.ok)throw new Error(r.status);
       all.push(...parseICS(await r.text()));
     }catch(err){failed.push(f.id)}
   }
-  events=all.flatMap(x=>expand(x));
+  events=tagged(all.flatMap(x=>expand(x)));
   document.getElementById('note').textContent=failed.length?`Couldn’t load: ${failed.join(', ')}. Check the Worker address and feed names.`:`Loaded ${FEEDS.length} calendar${FEEDS.length>1?'s':''}.`;
   render();
 }
@@ -355,10 +374,11 @@ function ding(){
 const WINDOW=36*36e5;               /* a completed tile stays flipped for 36 hours */
 const START=new Date(2026,10,18);   /* Nov 18, 2026 */
 const dayIdx=d=>Math.round((sod(d)-START)/864e5);
+const SAT=(6-START.getDay()+7)%7;  /* day index offset of the first Saturday */
 const PEOPLE={
-  Beth:{cls:'p-beth',chores:[{id:'wipe',name:'Wipe the table',every:2,off:1},{id:'sweep',name:'Sweep the floor',every:2,off:0},{id:'room',name:'Tidy room',every:5,off:2}]},
+  Beth:{cls:'p-beth',chores:[{id:'wipe',name:'Wipe the table',every:2,off:1},{id:'sweep',name:'Sweep the floor',every:2,off:0},{id:'room',name:'Tidy room',every:7,off:SAT,span:2}]},
   Lucy:{cls:'p-lucy',chores:[{id:'fold',name:'Fold clothes',every:2,off:0},{id:'desk',name:'Tidy kitchen desk',every:2,off:1},{id:'bed',name:'Tidy bedroom',every:3,off:0}]},
-  Rose:{cls:'p-rose',chores:[{id:'wipe',name:'Wipe the table',every:2,off:0},{id:'sweep',name:'Sweep the floor',every:2,off:1},{id:'room',name:'Tidy room',every:5,off:0}]}
+  Rose:{cls:'p-rose',chores:[{id:'wipe',name:'Wipe the table',every:2,off:0},{id:'sweep',name:'Sweep the floor',every:2,off:1},{id:'room',name:'Tidy room',every:7,off:SAT,span:2}]}
 };
 
 /* Completed chores per person as {k:'chore|dayIndex', t:timestamp}, kept in this browser */
@@ -385,10 +405,12 @@ function visible(p,now){
   P.sort(byDue);
   return[...C,...P.slice(0,Math.max(0,3-C.length))].sort(byDue);
 }
-const dueText=(d,now)=>{
-  const n=d-dayIdx(new Date(now));
-  return[`Due ${add(START,d).toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}`,
-    n<0?`${-n} day${n<-1?'s':''} overdue`:n===0?'Today':n===1?'Tomorrow':`${n} days away`];
+const SPAN=x=>x.c.span||1;   /* weekend chores are due Saturday through Sunday */
+const status=(x,now)=>{const T=dayIdx(new Date(now));return T<x.d?'':T<=x.d+SPAN(x)-1?'due':'over'};
+const dueText=(x,now)=>{
+  const T=dayIdx(new Date(now)),e=x.d+SPAN(x)-1,shown=T>x.d&&T<=e?T:x.d;
+  return[`Due ${add(START,shown).toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}`,
+    T>e?`${T-e} day${T-e>1?'s':''} overdue`:T>=x.d?'Today':x.d-T===1?'Tomorrow':`${x.d-T} days away`];
 };
 
 document.getElementById('chores').innerHTML=defs+Object.entries(PEOPLE).map(([p,v])=>
@@ -412,7 +434,8 @@ function renderChores(){
       const isDone=done[p].some(y=>y.k===x.key&&now-y.t<WINDOW);
       if(!t){t=makeTile(p,x);if(isDone)t.classList.add('done')}
       else t.classList.toggle('done',isDone);
-      const [a,b]=dueText(x.d,now);
+      const [a,b]=dueText(x,now),st=status(x,now);
+      t.classList.toggle('t-due',st==='due');t.classList.toggle('t-over',st==='over');
       t.querySelector('b').textContent=x.c.name;
       const s=t.querySelectorAll('small');s[0].textContent=a;s[1].textContent=b;
       t.setAttribute('aria-pressed',isDone);
@@ -439,4 +462,3 @@ render();loadFeeds();
 </script>
 </body>
 </html>
-
